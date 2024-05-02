@@ -1,0 +1,7 @@
+## Interface: 20504
+## Title: CRS
+## Author: Salmond
+## Version: 1.0.0
+## Notes: Completely replaces warrior sounds
+
+Main.lua
