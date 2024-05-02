@@ -55,7 +55,19 @@ local soundsToMute = {
 	-- gouge
 	568415,
 	568533,
-
+	-- crimson tempest
+	1311847,
+	1311848,
+	1311849,
+	1311850,
+	1311851,
+	1453442,
+	1453443,
+	-- saber slash
+	1348450,
+	1348451,
+	1348452,
+	1348453,
 };
 
 local _debug = true -- Enable to Display debug messages.
@@ -261,8 +273,8 @@ function CRSFrame:UNIT_SPELLCAST_SUCCEEDED(unitID, lineID, spellID)
 			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Gouge.ogg", "SFX");
 		end
 
-		-- CoS
-		if spellID == 37683 then
+		-- Evasion
+		if spellID == 5277 then
 			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\ShadowCast.ogg", "SFX");
 			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Evasion.ogg", "SFX");
 		end
@@ -271,6 +283,12 @@ function CRSFrame:UNIT_SPELLCAST_SUCCEEDED(unitID, lineID, spellID)
 		if spellID == 1833 then
 			PlaySoundFile(SwingSounds[math.random(#SwingSounds)], "SFX");
 			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Kidneyshot.ogg", "SFX");
+		end
+
+		-- Crimson Tempest
+		if spellID == 121411 then
+			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Cleave.ogg", "SFX");
+			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Backstab.ogg", "SFX");
 		end
 	end
 
