@@ -105,43 +105,14 @@ local DSSounds = {
 	"Interface\\Addons\\CRS\\Sounds\\DS3.ogg",
 };
 
-local Swords2HSwings = {
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Swords_2H\\Hit1.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Swords_2H\\Hit2.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Swords_2H\\Hit3.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Swords_2H\\Hit4.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Swords_2H\\Hit5.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Swords_2H\\Hit6.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Swords_2H\\Hit7.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Swords_2H\\Hit8.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Swords_2H\\Hit9.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Swords_2H\\Hit10.ogg",
-};
-
-local Maces2HSwings = {
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Maces_2H\\Hit1.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Maces_2H\\Hit2.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Maces_2H\\Hit3.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Maces_2H\\Hit4.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Maces_2H\\Hit5.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Maces_2H\\Hit6.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Maces_2H\\Hit7.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Maces_2H\\Hit8.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Maces_2H\\Hit9.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Maces_2H\\Hit10.ogg",
-};
-
-local Axes2HSwings = {
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Axes_2H\\Hit1.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Axes_2H\\Hit2.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Axes_2H\\Hit3.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Axes_2H\\Hit4.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Axes_2H\\Hit5.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Axes_2H\\Hit6.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Axes_2H\\Hit7.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Axes_2H\\Hit8.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Axes_2H\\Hit9.ogg",
-	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Axes_2H\\Hit10.ogg",
+local DaggerSwings = {
+	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Daggers\\Hit1.ogg",
+	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Daggers\\Hit2.ogg",
+	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Daggers\\Hit3.ogg",
+	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Daggers\\Hit4.ogg",
+	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Daggers\\Hit5.ogg",
+	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Daggers\\Hit6.ogg",
+	"Interface\\Addons\\CRS\\Sounds\\Weapons\\Daggers\\Hit7.ogg",
 };
 
 -- contains IDs of spells that should play a Rend sound on crit
@@ -158,34 +129,24 @@ transmogLocation.modification=0
 
 function PlaySwingSound()
 	local itemType = DetectWeaponType();
-	if itemType == "2H Mace" then
-		PlaySoundFile(Maces2HSwings[math.random(#Maces2HSwings)], "SFX");
-	elseif itemType == "2H Sword" then
-		PlaySoundFile(Swords2HSwings[math.random(#Swords2HSwings)], "SFX");
-	elseif itemType == "2H Axe" then
-		PlaySoundFile(Axes2HSwings[math.random(#Axes2HSwings)], "SFX");
+	if itemType == "Dagger" then
+		PlaySoundFile(DaggerSwings[math.random(#DaggerSwings)], "SFX");
 	end;
 end
 
 function DetectWeaponType()
 	local baseSourceID, baseVisualID, appliedSourceID, appliedVisualID, appliedCategoryID, pendingSourceID, pendingVisualID, pendingCategoryID, hasUndo, isHideVisual, itemSubclass = C_Transmog.GetSlotVisualInfo(transmogLocation);
-	if itemSubclass == 5 then
-		return "2H Mace";
-	elseif itemSubclass == 8 then
-		return "2H Sword";
-	elseif itemSubclass == 1 then
-		return "2H Axe";
+	if itemSubclass == nil then
+		local mainHandLink = GetInventoryItemLink("player", GetInventorySlotInfo("MainHandSlot"));
+		local _, _, _, _, _, _, equipedSubclass = C_Item.GetItemInfoInstant(mainHandLink);
+		itemSubclass = equipedSubclass;
+	end
+
+	if itemSubclass == 15 then
+		return "Dagger";
 	else
 		return;
 	end;
-end
-
-function BladestormRend()
-	local found = select(1, AuraUtil.FindAuraByName("Bladestorm", "player"));
-	if found ~= nil then
-		PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Rend.ogg", "SFX");
-		C_Timer.After(1, BladestormRend);
-	end
 end
 
 function PlayCleaveSoundIfSweepingStrikes()
@@ -201,26 +162,55 @@ function CRSFrame:COMBAT_LOG_EVENT_UNFILTERED()
 	HandleCombatLog(CombatLogGetCurrentEventInfo());
 end
 
+-- Track when previous attack was made to prevent spam with autoattack sounds
+local previousAttackTime = 0;
+
 function HandleCombatLog(...)
 	local ts, subevent, _, sourceGUID = ...;
 	if sourceGUID ~= playerGUID then
 		return;
 	end
 
-	if subevent == "SPELL_DAMAGE" then
-		local spellId, _, _, _, _, _, _, _, _, critical = select(12, ...);
-		if CritEffect[spellId] and critical then
-			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Rend.ogg", "SFX");
+	if subevent == "SWING_DAMAGE" then
+		-- local amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = select(12, CombatLogGetCurrentEventInfo());
+		-- autoAttackCrit = critical;
+		-- PlaySwingSound();
+		local currentTime = time();
+		if (currentTime - previousAttackTime) >= 1 then
+			-- PlaySwingSound();
+			C_Timer.After(0.1, PlaySwingSound);
 		end
+
+		return;
+	end
+
+	if subevent == "SPELL_DAMAGE" then
+		previousAttackTime = time();
+		-- local spellId, _, _, _, _, _, _, _, _, critical = select(12, ...);
+		-- if CritEffect[spellId] and critical then
+		-- 	PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Rend.ogg", "SFX");
+		-- end
 	end
 end
+
+local attack_ids = {
+	1329,
+	1943,
+	8676,
+	32645,
+	703,
+	5938,
+	51723,
+	121411,
+};
+
 --
 function CRSFrame:UNIT_SPELLCAST_SUCCEEDED(unitID, lineID, spellID)
 	if unitID == "player" then
 		errTxt("Spell cast Succeeded, spellID ".. spellID);
 
 		-- add poison sounds just for fun
-		if math.random(5) == 1 then
+		if attack_ids[spellID] and math.random(5) == 1  then
 			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\HellRot.ogg", "SFX");
 		end
 
