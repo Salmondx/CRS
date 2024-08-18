@@ -2,6 +2,6 @@
 ## Title: CRS
 ## Author: Salmond
 ## Version: 1.0.0
-## Notes: Completely replaces warrior sounds
+## Notes: Completely replaces rogue sounds
 
 Main.lua

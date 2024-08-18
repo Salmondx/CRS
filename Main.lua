@@ -178,7 +178,7 @@ function HandleCombatLog(...)
 		local currentTime = time();
 		if (currentTime - previousAttackTime) >= 1 then
 			-- PlaySwingSound();
-			C_Timer.After(0.1, PlaySwingSound);
+			C_Timer.After(0.2, PlaySwingSound);
 		end
 
 		return;
@@ -226,7 +226,7 @@ function CRSFrame:UNIT_SPELLCAST_SUCCEEDED(unitID, lineID, spellID)
 		end
 
 		-- Ambush
-		if spellID == 8676 or spellID == 430023 then
+		if spellID == 8676 or spellID == 430023 or spellID == 185438 or spellID == 53 or spellID == 200758 then
 			PlaySoundFile(SwingSounds[math.random(#SwingSounds)], "SFX");
 			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Backstab.ogg", "SFX");
 		end
@@ -242,6 +242,11 @@ function CRSFrame:UNIT_SPELLCAST_SUCCEEDED(unitID, lineID, spellID)
 			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Rend.ogg", "SFX");
 		end
 
+		-- Eviscerate
+		if spellID == 196819 then
+			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\ExecuteTarget.ogg", "SFX");
+		end
+
 		-- SnD
 		if spellID == 315496 then
 			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\Cleave.ogg", "SFX");
@@ -253,7 +258,7 @@ function CRSFrame:UNIT_SPELLCAST_SUCCEEDED(unitID, lineID, spellID)
 		end
 
 		-- FoK
-		if spellID == 51723 then
+		if spellID == 51723 or spellID == 197835 then
 			PlaySoundFile("Interface\\Addons\\CRS\\Sounds\\FoK.ogg", "SFX");
 		end
 
